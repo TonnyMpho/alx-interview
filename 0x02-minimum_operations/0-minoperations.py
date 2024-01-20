@@ -13,6 +13,7 @@ def minOperations(n: int) -> int:
     min_ops = 0
     current_len = 1
     clipboard = 0
+
     while current_len < n:
         if n % current_len == 0:
             clipboard = current_len
@@ -20,4 +21,3 @@ def minOperations(n: int) -> int:
         current_len += clipboard
         min_ops += 1
     return min_ops
-
