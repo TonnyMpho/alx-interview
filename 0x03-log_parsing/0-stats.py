@@ -1,11 +1,14 @@
 #!/usr/bin/python3
+""" Log parsing """
 import sys
+
 
 def print_metrics(total_size, status_codes):
     print(f"Total file size: {total_size}")
     for code in sorted(status_codes.keys()):
         if status_codes[code] > 0:
             print(f"{code}: {status_codes[code]}")
+
 
 def parse_line(line, total_size, status_codes):
     try:
@@ -21,6 +24,7 @@ def parse_line(line, total_size, status_codes):
         pass
 
     return total_size, status_codes
+
 
 def compute_metrics():
     total_size = 0
@@ -42,6 +46,6 @@ def compute_metrics():
 
     print_metrics(total_size, status_codes)
 
+
 if __name__ == "__main__":
     compute_metrics()
-
