@@ -1,64 +1,47 @@
 #!/usr/bin/python3
-""" Log parsing """
 import sys
-import signal
 
+def print_metrics(total_size, status_codes):
+    print(f"Total file size: {total_size}")
+    for code in sorted(status_codes.keys()):
+        if status_codes[code] > 0:
+            print(f"{code}: {status_codes[code]}")
 
-def initialize_metrics():
-    return {
-        'total_file_size': 0,
-        'status_code_counts': {
-            200: 0,
-            301: 0,
-            400: 0,
-            401: 0,
-            403: 0,
-            404: 0,
-            405: 0,
-            500: 0},
-        'line_count': 0
-    }
-
-
-def process_line(metrics, line):
+def parse_line(line, total_size, status_codes):
     try:
         parts = line.split()
-        ip_address = parts[0]
-        date = parts[3][1:]
-        status_code = int(parts[-2])
-        file_size = int(parts[-1])
-
-        # Update metrics
-        metrics['total_file_size'] += file_size
-        metrics['status_code_counts'][status_code] += 1
-        metrics['line_count'] += 1
+        if len(parts) > 2 and parts[-1].isdigit() and parts[-2].isdigit():
+            size = int(parts[-1])
+            total_size += size
+            code = int(parts[-2])
+            if code in status_codes:
+                status_codes[code] += 1
     except (ValueError, IndexError):
-        # Skip lines with incorrect format
+        # Ignore lines with incorrect integer values or unexpected format
         pass
 
+    return total_size, status_codes
 
-def print_statistics(metrics):
-    print(f"Total file size: {metrics['total_file_size']}")
-    for code in sorted(metrics['status_code_counts']):
-        count = metrics['status_code_counts'][code]
-        if count > 0:
-            print(f"{code}: {count}")
+def compute_metrics():
+    total_size = 0
+    status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+    line_count = 0
 
+    try:
+        for line in sys.stdin:
+            total_size, status_codes = parse_line(line.strip(), total_size, status_codes)
+            line_count += 1
 
-def signal_handler(signal, frame):
-    print_statistics(metrics)
-    sys.exit(0)
+            if line_count == 10:
+                print_metrics(total_size, status_codes)
+                line_count = 0
 
+    except KeyboardInterrupt:
+        # Handle CTRL+C
+        pass
 
-metrics = initialize_metrics()
-signal.signal(signal.SIGINT, signal_handler)
+    print_metrics(total_size, status_codes)
 
-try:
-    for line in sys.stdin:
-        process_line(metrics, line)
-        if metrics['line_count'] % 10 == 0:
-            print_statistics(metrics)
+if __name__ == "__main__":
+    compute_metrics()
 
-except KeyboardInterrupt:
-    # Handle keyboard interrupt
-    signal_handler(signal.SIGINT, None)
