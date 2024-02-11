@@ -8,9 +8,11 @@ def is_safe(board, row, col):
     Check if there is a queen in the same row or diagonal
     """
     for prev_row, prev_col in board:
-        if row == prev_row or col == prev_col or abs(row - prev_row) == abs(col - prev_col):
+        if row == prev_row or col == prev_col or abs(
+                row - prev_row) == abs(col - prev_col):
             return False
     return True
+
 
 def solve_nqueens_util(board, col, n, solutions):
     """
@@ -25,6 +27,7 @@ def solve_nqueens_util(board, col, n, solutions):
             board.append([row, col])
             solve_nqueens_util(board, col + 1, n, solutions)
             board.pop()
+
 
 def solve_nqueens(n):
     """
@@ -47,6 +50,7 @@ def solve_nqueens(n):
     for solution in solutions:
         print(solution)
     print()
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
