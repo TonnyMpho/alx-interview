@@ -22,8 +22,6 @@ const characters = (id) => {
         return;
       }
 
-      console.log(`Characters in ${movieData.title}:`);
-
       for (const characterLink of movieData.characters) {
         request(characterLink, (err, res, charBody) => {
           if (err) {
