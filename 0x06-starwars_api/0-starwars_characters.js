@@ -14,32 +14,19 @@ const characters = (id) => {
       return;
     }
 
-    try {
-      const movieData = JSON.parse(body);
+    const movieData = JSON.parse(body);
 
-      if (!movieData.characters || movieData.characters.length === 0) {
-        console.log('No characters found for this movie.');
-        return;
-      }
-
-      for (const characterLink of movieData.characters) {
-        request(characterLink, (err, res, charBody) => {
-          if (err) {
-            console.error('Error:', err);
+    for (const characterLink of movieData.characters) {
+      request(characterLink, (err, res, charBody) => {
+        if (err) {
+          console.error('Error:', err);
             return;
-          }
+        }
 
-          try {
-            const characterData = JSON.parse(charBody);
-            console.log(characterData.name);
-          } catch (charParseError) {
-            console.error('Error parsing character data:', charParseError);
-          }
-        });
-      }
-    } catch (parseError) {
-      console.error('Error parsing movie data:', parseError);
-    }
+        const characterData = JSON.parse(charBody);
+          console.log(characterData.name);
+       });
+     }
   });
 };
 
