@@ -6,41 +6,43 @@ const request = require('request');
 const id = process.argv[2]
 const url = `https://swapi-api.alx-tools.com/api/films/${id}`;
 
-request(url, (error, response, body) => {
-  if (error) {
-    console.error('Error:', error);
-    return;
-  }
+const characters = (id) => {
 
-  if (response.statusCode !== 200) {
-    console.error(`Error: Status Code ${response.statusCode}`);
-    return;
-  }
+  request(url, (error, response, body) => {
+    if (error) {
+      console.error('Error:', error);
+      return;
+    }
 
-  const filmData = JSON.parse(body);
-  const characters = filmData.characters;
+    try {
+      const movieData = JSON.parse(body);
 
-  if (!characters || characters.length === 0) {
-    console.log('No characters found for this movie.');
-    return;
-  }
-
-  console.log(`Characters in ${filmData.title}:`);
-
-  characters.forEach((characterUrl) => {
-    request(characterUrl, (charError, charResponse, charBody) => {
-      if (charError) {
-        console.error('Error:', charError);
+      if (!movieData.characters || movieData.characters.length === 0) {
+        console.log('No characters found for this movie.');
         return;
       }
 
-      if (charResponse.statusCode !== 200) {
-        console.error(`Error: Status Code ${charResponse.statusCode}`);
-        return;
-      }
+      console.log(`Characters in ${movieData.title}:`);
 
-      const characterData = JSON.parse(charBody);
-      console.log(characterData.name);
-    });
+      for (const characterLink of movieData.characters) {
+        request(characterLink, (err, res, charBody) => {
+          if (err) {
+            console.error('Error:', err);
+            return;
+          }
+
+          try {
+            const characterData = JSON.parse(charBody);
+            console.log(characterData.name);
+          } catch (charParseError) {
+            console.error('Error parsing character data:', charParseError);
+          }
+        });
+      }
+    } catch (parseError) {
+      console.error('Error parsing movie data:', parseError);
+    }
   });
-});
+};
+
+characters(id);
