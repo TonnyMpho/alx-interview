@@ -2,51 +2,68 @@
 """ 0x0A. Prime Game """
 
 
-def is_prime(num):
-    """
-    Helper function to check if a number is prime.
-    """
-    if num < 2:
-        return False
-    for i in range(2, int(num**0.5) + 1):
-        if num % i == 0:
-            return False
-    return True
+def sieve_of_eratosthenes(limit):
+    """ sieve algorithm """
+    primes = []
+    sieve = [True] * (limit + 1)
+    sieve[0] = sieve[1] = False
+
+    for num in range(2, int(limit ** 0.5) + 1):
+        if sieve[num]:
+            primes.append(num)
+            for multiple in range(num * num, limit + 1, num):
+                sieve[multiple] = False
+
+    for num in range(int(limit ** 0.5) + 1, limit + 1):
+        if sieve[num]:
+            primes.append(num)
+
+    return primes
 
 def isWinner(x, nums):
-    """
-    Determines the winner of each game based on the rules described.
-    """
-    maria_wins = 0
-    ben_wins = 0
+    """ Function to determine if a number is prime """
+    def is_prime(num):
+        if num < 2:
+            return False
+        for i in range(2, int(num**0.5) + 1):
+            if num % i == 0:
+                return False
+        return True
 
-    for n in nums:
-        maria_turn = True
-        while n > 1:
-            prime = 2
-            while prime <= n:
-                if is_prime(prime):
-                    break
-                prime += 1
+    def play_game(n):
+        """ Function to play the game for a given round and n """
+        primes = sieve_of_eratosthenes(n)
+        primes_set = set(primes)
+        turn = 0
 
-            if prime > n:
-                if maria_turn:
-                    ben_wins += 1
+        while True:
+            if turn == 0:
+                # Maria's turn
+                for prime in primes:
+                    if prime <= n and prime in primes_set:
+                        primes_set -= {i for i in range(prime, n + 1, prime)}
+                        turn = 1
+                        break
                 else:
-                    maria_wins += 1
-                break
-            n -= prime * (n // prime)
-            maria_turn = not maria_turn
-        
-        if n == 1:
-            if maria_turn:
-                ben_wins += 1
+                    return "Ben"
             else:
-                maria_wins += 1
+                # Ben's turn
+                for prime in primes:
+                    if prime <= n and prime in primes_set:
+                        primes_set -= {i for i in range(prime, n + 1, prime)}
+                        turn = 0
+                        break
+                else:
+                    return "Maria"
 
-    if maria_wins > ben_wins:
-        return 'Maria'
-    elif ben_wins > maria_wins:
-        return 'Ben'
-    else:
+    winners = {"Maria": 0, "Ben": 0}
+
+    for i in range(x):
+        winner = play_game(nums[i])
+        winners[winner] += 1
+
+    max_wins = max(winners.values())
+    if list(winners.values()).count(max_wins) > 1:
         return None
+    else:
+        return max(winners, key=winners.get)
